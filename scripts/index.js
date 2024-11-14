@@ -12,6 +12,10 @@ const profileFormPopup = document.querySelector('.popup_type_edit');
 const cardFormPopup = document.querySelector('.popup_type_new-card');
 const imagePopup = document.querySelector('.popup_type_image');
 
+profileFormPopup.classList.add('popup_is-animated');
+cardFormPopup.classList.add('popup_is-animated');
+imagePopup.classList.add('popup_is-animated');
+
 const profileEditButton = document.querySelector('.profile__edit-button');
 const addCardButton = document.querySelector('.profile__add-button');
 
