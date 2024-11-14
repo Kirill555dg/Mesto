@@ -42,6 +42,7 @@ function createCard(link, title){
     cardImage.setAttribute('src', link);
     cardImage.setAttribute('alt', title);
     cardImage.addEventListener('click', event => {
+        imagePopup.querySelector('.popup__image').src = "";
         imagePopup.querySelector('.popup__image').src = link;
         imagePopup.querySelector('.popup__caption').textContent = title;
         openModal(imagePopup);
