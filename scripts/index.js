@@ -1,35 +1,43 @@
 import {initialCards} from './cards.js';
 
-// Темплейт карточки
+//// DOM-узлы ////
 
+// Темплейт карточки
 const cardTemplate = document.querySelector('#card-template').content;
 
-// DOM узлы
+// Данные пользователя
+const profileTitle = document.querySelector('.profile__title');
+const profileDescription = document.querySelector('.profile__description');
 
+// Список карточек
 const placesList = document.querySelector('.places__list');
 
+// Поп-апы
 const profileFormPopup = document.querySelector('.popup_type_edit');
 const cardFormPopup = document.querySelector('.popup_type_new-card');
 const imagePopup = document.querySelector('.popup_type_image');
 
+// Добавление анимации поп-апам
 profileFormPopup.classList.add('popup_is-animated');
 cardFormPopup.classList.add('popup_is-animated');
 imagePopup.classList.add('popup_is-animated');
 
+// Кнопки вызова поп-апов
 const profileEditButton = document.querySelector('.profile__edit-button');
 const addCardButton = document.querySelector('.profile__add-button');
 
-const profileTitle = document.querySelector('.profile__title');
-const profileDescription = document.querySelector('.profile__description');
-
+//// Функции ////
 
 // Функция создания карточки
 function createCard(link, title){
     const cardElement = cardTemplate.querySelector('.places__item').cloneNode(true);
+
     const cardImage = cardElement.querySelector('.card__image');
     const cardTitle = cardElement.querySelector('.card__title');
     const cardLikeButton = cardElement.querySelector('.card__like-button');
     const cardDeleteButton = cardElement.querySelector('.card__delete-button');
+
+    cardTitle.textContent = title;
 
     cardImage.setAttribute('src', link);
     cardImage.setAttribute('alt', title);
@@ -39,8 +47,6 @@ function createCard(link, title){
         openModal(imagePopup);
     });
 
-    cardTitle.textContent = title;
-
     cardLikeButton.addEventListener('click', event => 
         event.target.classList.toggle('card__like-button_is-active')
     );
@@ -49,73 +55,31 @@ function createCard(link, title){
         event.target.closest('.places__item').remove()
     );
 
-    
-
     return cardElement;
 }
 
-
-
-// Вывести карточки на страницу
-
-initialCards.forEach(cardInfo => placesList.append(createCard(cardInfo['link'], cardInfo['name'])));
-
-
-
-// Находим форму в DOM
-const profileFormElement = profileFormPopup.querySelector('.popup__form');
-// Находим поля формы в DOM
-const nameInput = profileFormElement.querySelector('.popup__input_type_name');
-const jobInput = profileFormElement.querySelector('.popup__input_type_description');
-
-// Обработчик «отправки» формы, хотя пока
-// она никуда отправляться не будет
-function handleProfileFormSubmit(evt) {
-    evt.preventDefault(); // Эта строчка отменяет стандартную отправку формы.
-
-    profileTitle.textContent = nameInput.value;
-    profileDescription.textContent = jobInput.value;
-
-    closeModal(profileFormPopup);
-}
-
-// Прикрепляем обработчик к форме:
-// он будет следить за событием “submit” - «отправка»
-profileFormElement.addEventListener('submit', handleProfileFormSubmit);
-
-
-// Находим форму в DOM
-const cardFormElement = cardFormPopup.querySelector('.popup__form');
-// Находим поля формы в DOM
-const titleInput = cardFormElement.querySelector('.popup__input_type_card-name');
-const linkInput = cardFormElement.querySelector('.popup__input_type_url');
-
-// Обработчик «отправки» формы, хотя пока
-// она никуда отправляться не будет
-function handleCardFormSubmit(evt) {
-    evt.preventDefault(); // Эта строчка отменяет стандартную отправку формы.
-
-    placesList.prepend(createCard(linkInput.value, titleInput.value));
-
-    closeModal(cardFormPopup);
-}
-
-// Прикрепляем обработчик к форме:
-// он будет следить за событием “submit” - «отправка»
-cardFormElement.addEventListener('submit', handleCardFormSubmit);
-
-
-// Открытие и закрытие поп-апа
-
+// Функция открытия поп-апа
 function openModal(popup) {      
     popup.classList.add('popup_is-opened');
     popup.querySelector('.popup__close').addEventListener('click', event => closeModal(popup));
 } 
 
+// Функция закрытия поп-апа
 function closeModal(popup) {
     popup.classList.remove('popup_is-opened');
 }
 
+
+// Вывод заготовленных карточек на страницу
+initialCards.forEach(cardInfo => placesList.append(createCard(cardInfo['link'], cardInfo['name'])));
+
+//// Обработка поп-апов ////
+
+// Обработка поп-апа изменения профиля
+const profileFormElement = profileFormPopup.querySelector('.popup__form');
+
+const nameInput = profileFormElement.querySelector('.popup__input_type_name');
+const jobInput = profileFormElement.querySelector('.popup__input_type_description');
 
 profileEditButton.addEventListener('click', event => {
 
@@ -125,6 +89,36 @@ profileEditButton.addEventListener('click', event => {
     openModal(profileFormPopup);
 });
 
+// Обработчик «отправки» формы
+function handleProfileFormSubmit(evt) {
+    evt.preventDefault(); // Эта строчка отменяет стандартную отправку формы.
+
+    profileTitle.textContent = nameInput.value;
+    profileDescription.textContent = jobInput.value;
+
+    closeModal(profileFormPopup);
+}
+
+// Прикрепление обработчика к форме
+profileFormElement.addEventListener('submit', handleProfileFormSubmit);
+
+
+// Обработка поп-апа создания карточки
+const cardFormElement = cardFormPopup.querySelector('.popup__form');
+
+const titleInput = cardFormElement.querySelector('.popup__input_type_card-name');
+const linkInput = cardFormElement.querySelector('.popup__input_type_url');
+
 addCardButton.addEventListener('click', event => openModal(cardFormPopup));
 
+// Обработчик «отправки» формы
+function handleCardFormSubmit(evt) {
+    evt.preventDefault(); // Эта строчка отменяет стандартную отправку формы.
 
+    placesList.prepend(createCard(linkInput.value, titleInput.value));
+
+    closeModal(cardFormPopup);
+}
+
+// Прикрепление обработчика к форме
+cardFormElement.addEventListener('submit', handleCardFormSubmit);
