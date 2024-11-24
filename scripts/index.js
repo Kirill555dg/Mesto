@@ -39,22 +39,24 @@ function createCard(link, title) {
 
   cardTitle.textContent = title
 
-  cardImage.setAttribute('src', link)
-  cardImage.setAttribute('alt', title)
+  cardImage.src = link
+  cardImage.alt = title
   cardImage.addEventListener('click', event => {
-    imagePopup.querySelector('.popup__image').src = ""
-    imagePopup.querySelector('.popup__image').src = link
-    imagePopup.querySelector('.popup__caption').textContent = title
+    const image = imagePopup.querySelector('.popup__image')
+    const caption = imagePopup.querySelector('.popup__caption')
+    image.src = ""
+    image.src = link
+    caption.textContent = title
     openModal(imagePopup)
   })
 
-  cardLikeButton.addEventListener('click', event =>
+  cardLikeButton.addEventListener('click', event => {
     event.target.classList.toggle('card__like-button_is-active')
-  )
+  })
 
-  cardDeleteButton.addEventListener('click', event =>
+  cardDeleteButton.addEventListener('click', event => {
     event.target.closest('.places__item').remove()
-  )
+  })
 
   return cardElement
 }
@@ -81,8 +83,7 @@ function openModal(popup) {
     }
   })
 
-  popup.querySelector('.popup__close').addEventListener('click', event => {
-
+  popup.querySelector('.popup__close').addEventListener('click', () => {
     closeModal(popup)
   })
 }
@@ -94,7 +95,12 @@ function closeModal(popup) {
 
 
 // Вывод заготовленных карточек на страницу
-initialCards.forEach(cardInfo => placesList.append(createCard(cardInfo['link'], cardInfo['name'])))
+initialCards.forEach(cardInfo => {
+  const link = cardInfo['link']
+  const name = cardInfo['name']
+  const newCard = createCard(link, name)
+  placesList.append(newCard)
+})
 
 //// Обработка поп-апов ////
 
@@ -135,7 +141,7 @@ const cardFormElement = cardFormPopup.querySelector('.popup__form')
 const titleInput = cardFormElement.querySelector('.popup__input_type_card-name')
 const linkInput = cardFormElement.querySelector('.popup__input_type_url')
 
-addCardButton.addEventListener('click', event => {
+addCardButton.addEventListener('click', () => {
 
   linkInput.value = ''
   titleInput.value = ''
@@ -156,12 +162,11 @@ function handleCardFormSubmit(evt) {
 // Прикрепление обработчика к форме
 cardFormElement.addEventListener('submit', handleCardFormSubmit)
 
-
 const showInputError = (formElement, inputElement, inputErrorClass, errorMessage, errorClass) => {
   const errorElement = formElement.querySelector(`.${inputElement.name}-error`)
   inputElement.classList.add(inputErrorClass)
-  errorElement.textContent = errorMessage
   errorElement.classList.add(errorClass)
+  errorElement.textContent = errorMessage
 }
 
 const hideInputError = (formElement, inputElement, inputErrorClass, errorClass) => {
@@ -174,9 +179,20 @@ const hideInputError = (formElement, inputElement, inputErrorClass, errorClass) 
 
 const checkInputValidity = (formElement, inputElement, validationSettings) => {
   if (!inputElement.validity.valid) {
-    showInputError(formElement, inputElement, validationSettings.inputErrorClass, inputElement.validationMessage, validationSettings.errorClass)
+    showInputError(
+      formElement,
+      inputElement,
+      validationSettings.inputErrorClass,
+      inputElement.validationMessage,
+      validationSettings.errorClass
+    )
   } else {
-    hideInputError(formElement, inputElement, validationSettings.inputErrorClass, validationSettings.errorClass)
+    hideInputError(
+      formElement,
+      inputElement,
+      validationSettings.inputErrorClass,
+      validationSettings.errorClass
+    )
   }
 }
 
@@ -185,7 +201,9 @@ const checkValidation = (formElement, validationSettings) => {
   const buttonElement = formElement.querySelector(validationSettings.submitButtonSelector)
 
   toggleButtonState(inputList, buttonElement, validationSettings.inactiveButtonClass)
-  inputList.forEach(inputElement => checkInputValidity(formElement, inputElement, validationSettings))
+  inputList.forEach(inputElement => {
+    checkInputValidity(formElement, inputElement, validationSettings)
+  })
 }
 
 const hasInvalidInput = (inputList) => {
@@ -207,7 +225,7 @@ const setEventListeners = (formElement, validationSettings) => {
   const buttonElement = formElement.querySelector(validationSettings.submitButtonSelector)
 
   inputList.forEach((inputElement) => {
-    inputElement.addEventListener('input', function () {
+    inputElement.addEventListener('input', () => {
       checkInputValidity(formElement, inputElement, validationSettings)
       toggleButtonState(inputList, buttonElement, validationSettings.inactiveButtonClass)
     })
@@ -216,7 +234,7 @@ const setEventListeners = (formElement, validationSettings) => {
 
 const enableValidation = (validationSettings) => {
   const formList = Array.from(document.querySelectorAll(validationSettings.formSelector))
-  formList.forEach((formElement) => {
+  formList.forEach(formElement => {
     setEventListeners(formElement, validationSettings)
   })
 }
