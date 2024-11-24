@@ -59,10 +59,32 @@ function createCard(link, title) {
   return cardElement
 }
 
+function closeOnOverlay(evt) {
+  closeModal(evt.target)
+}
+
 // Функция открытия поп-апа
 function openModal(popup) {
   popup.classList.add('popup_is-opened')
-  popup.querySelector('.popup__close').addEventListener('click', event => closeModal(popup))
+
+  popup.addEventListener('mouseover', event => {
+    if (event.target === event.currentTarget) {
+      popup.addEventListener('click', closeOnOverlay)
+      event.target.style.cursor = "pointer";
+    }
+  })
+
+  popup.addEventListener('mouseout', event => {
+    if (event.target === event.currentTarget) {
+      popup.removeEventListener('click', closeOnOverlay)
+      event.target.style.cursor = "default";
+    }
+  })
+
+  popup.querySelector('.popup__close').addEventListener('click', event => {
+
+    closeModal(popup)
+  })
 }
 
 // Функция закрытия поп-апа
