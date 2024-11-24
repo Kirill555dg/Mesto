@@ -167,9 +167,7 @@ const checkValidation = (formElement, validationSettings) => {
 }
 
 const hasInvalidInput = (inputList) => {
-  console.log(inputList)
   return inputList.some(inputElement => {
-    console.log(inputElement, inputElement.validity.valid)
     return !inputElement.validity.valid
   })
 }
@@ -186,7 +184,6 @@ const setEventListeners = (formElement, validationSettings) => {
   const inputList = Array.from(formElement.querySelectorAll(validationSettings.inputSelector))
   const buttonElement = formElement.querySelector(validationSettings.submitButtonSelector)
 
-  toggleButtonState(inputList, buttonElement, validationSettings.inactiveButtonClass)
   inputList.forEach((inputElement) => {
     inputElement.addEventListener('input', function () {
       checkInputValidity(formElement, inputElement, validationSettings)
