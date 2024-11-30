@@ -21,6 +21,10 @@ const profileFormPopup = document.querySelector('.popup_type_edit')
 const cardFormPopup = document.querySelector('.popup_type_new-card')
 const imagePopup = document.querySelector('.popup_type_image')
 
+// Элементы поп-апа картинки
+const image = imagePopup.querySelector('.popup__image')
+const caption = imagePopup.querySelector('.popup__caption')
+
 // Добавление анимации поп-апам
 profileFormPopup.classList.add('popup_is-animated')
 cardFormPopup.classList.add('popup_is-animated')
@@ -32,6 +36,21 @@ const addCardButton = document.querySelector('.profile__add-button')
 
 
 //// Функции ////
+
+
+// Обработчик нажатия на карточку
+placesList.addEventListener('click', event => {
+  if (event.target.classList.contains('card__image')) {
+    image.src = ""
+    image.src = event.target.src
+    caption.textContent = event.target.alt
+    openModal(imagePopup)
+  } else if (event.target.classList.contains('card__like-button')) {
+    event.target.classList.toggle('card__like-button_is-active')
+  } else if (event.target.classList.contains('card__delete-button')) {
+    event.target.closest('.places__item').remove()
+  }
+})
 
 // Вывод заготовленных карточек на страницу
 initialCards.forEach(cardInfo => {
