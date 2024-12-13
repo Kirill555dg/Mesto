@@ -101,21 +101,14 @@ placesList.addEventListener('click', event => {
 
 let userId;
 
-getUserInfo()
-  .then(userInfo => {
+Promise.all([getUserInfo(), getInitialCards()])
+  .then(([userInfo, cards]) => {
     profileName.textContent = userInfo.name;
     profileAbout.textContent = userInfo.about;
     profileAvatar.style.backgroundImage = `url(${userInfo.avatar})`;
     userId = userInfo._id;
-  })
-  .catch(err => {
-    console.log(err);
-  });
 
-
-getInitialCards()
-  .then(res => {
-    res.forEach(cardInfo => {
+    cards.forEach(cardInfo => {
       const link = cardInfo.link;
       const name = cardInfo.name;
       const likeCount = cardInfo.likes.length;
@@ -133,6 +126,39 @@ getInitialCards()
   .catch(err => {
     console.log(err);
   });
+
+// getUserInfo()
+//   .then(userInfo => {
+//     profileName.textContent = userInfo.name;
+//     profileAbout.textContent = userInfo.about;
+//     profileAvatar.style.backgroundImage = `url(${userInfo.avatar})`;
+//     userId = userInfo._id;
+//   })
+//   .catch(err => {
+//     console.log(err);
+//   });
+
+
+// getInitialCards()
+//   .then(cards => {
+//     cards.forEach(cardInfo => {
+//       const link = cardInfo.link;
+//       const name = cardInfo.name;
+//       const likeCount = cardInfo.likes.length;
+//       const _id = cardInfo._id;
+//       const newCard = createCard(link, name, likeCount, _id);
+//       if (cardInfo.likes.some(user => user._id === userId)) {
+//         newCard.querySelector('.card__like-button').classList.add('card__like-button_is-active');
+//       }
+//       if (cardInfo.owner._id !== userId) {
+//         newCard.querySelector('.card__delete-button').classList.add('card__delete-button_diactivate');
+//       }
+//       placesList.append(newCard);
+//     });
+//   })
+//   .catch(err => {
+//     console.log(err);
+//   });
 
 //// Обработка поп-апов ////
 
