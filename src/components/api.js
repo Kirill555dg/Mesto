@@ -58,6 +58,19 @@ export const postNewCard = (cardInfo) => {
     })
 }
 
+export const deleteCard = (cardId) => {
+  return fetch(`${config.baseUrl}/cards/${cardId}`, {
+    method: "DELETE",
+    headers: config.headers
+  })
+    .then(res => {
+      if (res.ok) {
+        return res.json();
+      }
+      return Promise.reject(`Ошибка: ${res.status}`);
+    })
+}
+
 export const toggleLikeCard = (cardId, _method) => {
   return fetch(`${config.baseUrl}/cards/likes/${cardId}`, {
     method: _method,

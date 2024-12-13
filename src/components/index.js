@@ -9,6 +9,7 @@ import {
   getUserInfo,
   changeUserInfo,
   postNewCard,
+  deleteCard,
   toggleLikeCard
 } from './api.js';
 
@@ -41,6 +42,7 @@ imagePopup.classList.add('popup_is-animated');
 const profileEditButton = document.querySelector('.profile__edit-button');
 const addCardButton = document.querySelector('.profile__add-button');
 
+
 //// Функции ////
 
 // Обработчик нажатия на карточку
@@ -51,7 +53,9 @@ placesList.addEventListener('click', event => {
     caption.textContent = event.target.alt
     openModal(imagePopup)
   } else if (event.target.classList.contains('card__like-button')) {
+    event.target.disabled = true;
     const cardItem = event.target.closest('.places__item');
+    // Метод для постановки или снятия лайка карточки
     let _method;
     if (event.target.classList.contains('card__like-button_is-active')) {
       _method = "DELETE";
@@ -59,25 +63,39 @@ placesList.addEventListener('click', event => {
       _method = "PUT";
     }
     toggleLikeCard(cardItem.id, _method)
-        .then(cardInfo => {
-          const newCardItem = updateCardLikes(cardItem, cardInfo.likes.length);
-          cardItem.replaceWith(newCardItem);
-          event.target.classList.toggle('card__like-button_is-active')
-        })
-        .catch(err => {
-          console.log(err);
-        });
+      .then(cardInfo => {
+        console.log(cardInfo)
+        const newCardItem = updateCardLikes(cardItem, cardInfo.likes.length);
+        cardItem.replaceWith(newCardItem);
+        event.target.classList.toggle('card__like-button_is-active')
+      })
+      .catch(err => {
+        console.log(err);
+      })
+      .finally(() => {
+        event.target.disabled = false;
+      });
   } else if (event.target.classList.contains('card__delete-button')) {
-    // TODO: DELETE
-    event.target.closest('.places__item').remove()
+    event.target.disabled = true;
+    const cardItem = event.target.closest('.places__item');
+    deleteCard(cardItem.id)
+      .then(res => {
+        cardItem.remove();
+      })
+      .catch(err => {
+        console.log(err);
+      })
   }
 })
+
+let userId;
 
 getUserInfo()
   .then(userInfo => {
     profileName.textContent = userInfo.name;
     profileAbout.textContent = userInfo.about;
     profileAvatar.style.backgroundImage = `url(${userInfo.avatar})`;
+    userId = userInfo._id;
   })
   .catch(err => {
     console.log(err);
@@ -87,11 +105,18 @@ getUserInfo()
 getInitialCards()
   .then(res => {
     res.forEach(cardInfo => {
+      console.log(cardInfo);
       const link = cardInfo.link;
       const name = cardInfo.name;
       const likeCount = cardInfo.likes.length;
       const _id = cardInfo._id;
       const newCard = createCard(link, name, likeCount, _id);
+      if (cardInfo.likes.some(user => user._id === userId)) {
+        newCard.querySelector('.card__like-button').classList.add('card__like-button_is-active');
+      }
+      if (cardInfo.owner._id !== userId) {
+        newCard.querySelector('.card__delete-button').classList.add('card__delete-button_diactivate');
+      }
       placesList.append(newCard);
     });
   })
