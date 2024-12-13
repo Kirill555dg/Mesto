@@ -8,6 +8,7 @@ import {
   getInitialCards,
   getUserInfo,
   changeUserInfo,
+  changeAvatar,
   postNewCard,
   deleteCard,
   toggleLikeCard
@@ -20,7 +21,6 @@ const profileName = document.querySelector('.profile__title');
 const profileAbout = document.querySelector('.profile__description');
 const profileAvatar = document.querySelector('.profile__image');
 
-
 // Список карточек
 const placesList = document.querySelector('.places__list');
 
@@ -28,19 +28,31 @@ const placesList = document.querySelector('.places__list');
 const profileFormPopup = document.querySelector('.popup_type_edit');
 const cardFormPopup = document.querySelector('.popup_type_new-card');
 const imagePopup = document.querySelector('.popup_type_image');
+const avatarFormPopup = document.querySelector('.popup_type_avatar');
 
 // Элементы поп-апа картинки
 const image = imagePopup.querySelector('.popup__image');
 const caption = imagePopup.querySelector('.popup__caption');
 
-// Добавление анимации поп-апам
-profileFormPopup.classList.add('popup_is-animated');
-cardFormPopup.classList.add('popup_is-animated');
-imagePopup.classList.add('popup_is-animated');
-
 // Кнопки вызова поп-апов
 const profileEditButton = document.querySelector('.profile__edit-button');
 const addCardButton = document.querySelector('.profile__add-button');
+
+const profileFormElement = profileFormPopup.querySelector('.popup__form');
+const profileFormButton = profileFormElement.querySelector('.popup__button');
+const nameInput = profileFormElement.querySelector('.popup__input_type_name');
+const aboutInput = profileFormElement.querySelector('.popup__input_type_description');
+nameInput.value = profileName.textContent;
+aboutInput.value = profileAbout.textContent;
+
+const cardFormElement = cardFormPopup.querySelector('.popup__form');
+const cardFormButton = cardFormElement.querySelector('.popup__button');
+const cardNameInput = cardFormElement.querySelector('.popup__input_type_card-name');
+const cardLinkInput = cardFormElement.querySelector('.popup__input_type_url');
+
+const avatarFormElement = avatarFormPopup.querySelector('.popup__form');
+const avatarFormButton = avatarFormElement.querySelector('.popup__button');
+const avatarLinkInput = avatarFormElement.querySelector('.popup__input_type_url');
 
 
 //// Функции ////
@@ -64,7 +76,6 @@ placesList.addEventListener('click', event => {
     }
     toggleLikeCard(cardItem.id, _method)
       .then(cardInfo => {
-        console.log(cardInfo)
         const newCardItem = updateCardLikes(cardItem, cardInfo.likes.length);
         cardItem.replaceWith(newCardItem);
         event.target.classList.toggle('card__like-button_is-active')
@@ -105,7 +116,6 @@ getUserInfo()
 getInitialCards()
   .then(res => {
     res.forEach(cardInfo => {
-      console.log(cardInfo);
       const link = cardInfo.link;
       const name = cardInfo.name;
       const likeCount = cardInfo.likes.length;
@@ -126,14 +136,42 @@ getInitialCards()
 
 //// Обработка поп-апов ////
 
+
+
+// Обработка поп-апа изменения аватарки
+profileAvatar.addEventListener('click', event => {
+
+  avatarLinkInput.value = profileAvatar.style.backgroundImage.slice(5, -2);
+
+  checkValidation(avatarFormElement, validationSettings)
+  openModal(avatarFormPopup)
+})
+
+// Обработчик «отправки» формы
+function handleAvatarFormSubmit(evt) {
+  evt.preventDefault() // Эта строчка отменяет стандартную отправку формы.
+
+  avatarFormButton.textContent = "Сохранение...";
+  const body = {
+    avatar: avatarLinkInput.value
+  };
+
+  changeAvatar(body)
+    .then(userInfo => {
+      profileAvatar.style.backgroundImage = `url(${userInfo.avatar})`;
+    })
+    .catch(err => {
+      console.log(err);
+    })
+    .finally(() => {
+      closeModal(avatarFormPopup);
+      avatarFormButton.textContent = "Сохранить";
+    });
+}
+
+avatarFormPopup.addEventListener('submit', handleAvatarFormSubmit)
+
 // Обработка поп-апа изменения профиля
-const profileFormElement = profileFormPopup.querySelector('.popup__form')
-
-const nameInput = profileFormElement.querySelector('.popup__input_type_name')
-const aboutInput = profileFormElement.querySelector('.popup__input_type_description')
-nameInput.value = profileName.textContent
-aboutInput.value = profileAbout.textContent
-
 profileEditButton.addEventListener('click', event => {
 
   nameInput.value = profileName.textContent
@@ -147,6 +185,7 @@ profileEditButton.addEventListener('click', event => {
 function handleProfileFormSubmit(evt) {
   evt.preventDefault() // Эта строчка отменяет стандартную отправку формы.
 
+  profileFormButton.textContent = "Сохранение...";
   const body = {
     name: nameInput.value,
     about: aboutInput.value
@@ -160,9 +199,10 @@ function handleProfileFormSubmit(evt) {
     .catch(err => {
       console.log(err);
     })
-    .finally();
-
-  closeModal(profileFormPopup)
+    .finally(() => {
+      closeModal(profileFormPopup);
+      profileFormButton.textContent = "Сохранить";
+    });
 }
 
 // Прикрепление обработчика к форме
@@ -170,10 +210,6 @@ profileFormElement.addEventListener('submit', handleProfileFormSubmit)
 
 
 // Обработка поп-апа создания карточки
-const cardFormElement = cardFormPopup.querySelector('.popup__form')
-
-const cardNameInput = cardFormElement.querySelector('.popup__input_type_card-name')
-const cardLinkInput = cardFormElement.querySelector('.popup__input_type_url')
 
 addCardButton.addEventListener('click', () => {
 
@@ -188,6 +224,7 @@ addCardButton.addEventListener('click', () => {
 function handleCardFormSubmit(evt) {
   evt.preventDefault() // Эта строчка отменяет стандартную отправку формы.
 
+  cardFormButton.textContent = "Создание...";
   const body = {
     name: cardNameInput.value,
     link: cardLinkInput.value
@@ -205,10 +242,10 @@ function handleCardFormSubmit(evt) {
     .catch(err => {
       console.log(err);
     })
-    .finally();
-
-
-  closeModal(cardFormPopup)
+    .finally(() => {
+      closeModal(cardFormPopup);
+      cardFormButton.textContent = "Создать";
+    });
 }
 
 // Прикрепление обработчика к форме
