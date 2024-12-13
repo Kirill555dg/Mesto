@@ -1,10 +1,16 @@
 import '../pages/index.css';
 
-import createCard from './card.js';
-import { enableValidation, checkValidation} from './validate.js';
+import { createCard, updateCardLikes } from './card.js';
+import { enableValidation, checkValidation } from './validate.js';
 import { openModal, closeModal } from './modal.js';
 
-import { getInitialCards, getUserInfo, changeUserInfo } from './api.js';
+import {
+  getInitialCards,
+  getUserInfo,
+  changeUserInfo,
+  postNewCard,
+  toggleLikeCard
+} from './api.js';
 
 //// DOM-узлы ////
 
@@ -45,8 +51,24 @@ placesList.addEventListener('click', event => {
     caption.textContent = event.target.alt
     openModal(imagePopup)
   } else if (event.target.classList.contains('card__like-button')) {
-    event.target.classList.toggle('card__like-button_is-active')
+    const cardItem = event.target.closest('.places__item');
+    let _method;
+    if (event.target.classList.contains('card__like-button_is-active')) {
+      _method = "DELETE";
+    } else {
+      _method = "PUT";
+    }
+    toggleLikeCard(cardItem.id, _method)
+        .then(cardInfo => {
+          const newCardItem = updateCardLikes(cardItem, cardInfo.likes.length);
+          cardItem.replaceWith(newCardItem);
+          event.target.classList.toggle('card__like-button_is-active')
+        })
+        .catch(err => {
+          console.log(err);
+        });
   } else if (event.target.classList.contains('card__delete-button')) {
+    // TODO: DELETE
     event.target.closest('.places__item').remove()
   }
 })
@@ -67,7 +89,9 @@ getInitialCards()
     res.forEach(cardInfo => {
       const link = cardInfo.link;
       const name = cardInfo.name;
-      const newCard = createCard(link, name);
+      const likeCount = cardInfo.likes.length;
+      const _id = cardInfo._id;
+      const newCard = createCard(link, name, likeCount, _id);
       placesList.append(newCard);
     });
   })
@@ -108,7 +132,9 @@ function handleProfileFormSubmit(evt) {
       profileName.textContent = userInfo.name;
       profileAbout.textContent = userInfo.about;
     })
-    .catch()
+    .catch(err => {
+      console.log(err);
+    })
     .finally();
 
   closeModal(profileFormPopup)
@@ -121,13 +147,13 @@ profileFormElement.addEventListener('submit', handleProfileFormSubmit)
 // Обработка поп-апа создания карточки
 const cardFormElement = cardFormPopup.querySelector('.popup__form')
 
-const titleInput = cardFormElement.querySelector('.popup__input_type_card-name')
-const linkInput = cardFormElement.querySelector('.popup__input_type_url')
+const cardNameInput = cardFormElement.querySelector('.popup__input_type_card-name')
+const cardLinkInput = cardFormElement.querySelector('.popup__input_type_url')
 
 addCardButton.addEventListener('click', () => {
 
-  linkInput.value = ''
-  titleInput.value = ''
+  cardLinkInput.value = ''
+  cardNameInput.value = ''
 
   checkValidation(cardFormElement, validationSettings)
   openModal(cardFormPopup)
@@ -137,7 +163,25 @@ addCardButton.addEventListener('click', () => {
 function handleCardFormSubmit(evt) {
   evt.preventDefault() // Эта строчка отменяет стандартную отправку формы.
 
-  placesList.prepend(createCard(linkInput.value, titleInput.value))
+  const body = {
+    name: cardNameInput.value,
+    link: cardLinkInput.value
+  };
+
+  postNewCard(body)
+    .then(cardInfo => {
+      const link = cardInfo.link;
+      const name = cardInfo.name;
+      const likeCount = cardInfo.likes.length;
+      const _id = cardInfo._id;
+      const newCard = createCard(link, name, likeCount, _id);
+      placesList.prepend(newCard);
+    })
+    .catch(err => {
+      console.log(err);
+    })
+    .finally();
+
 
   closeModal(cardFormPopup)
 }
